@@ -22,6 +22,7 @@ class Crosshair(pygame.sprite.Sprite):
 		self.rect.y = mousePos[1]-16
     		
 class Gun(pygame.sprite.Sprite):
+	bulletsLeft = 10
 
 	# Constructor
 	def __init__(self):
@@ -38,6 +39,8 @@ class Gun(pygame.sprite.Sprite):
     		
 class Gunshot(pygame.sprite.Sprite):
 	frames = []
+	frameRepeat = 3
+	steps = 0
 
 	# Constructor
 	def __init__(self):
@@ -70,39 +73,9 @@ class Gunshot(pygame.sprite.Sprite):
 			self.image.set_colorkey((0, 0, 0))
 			mousePos = pygame.mouse.get_pos()
 			self.rect.x = mousePos[0]+20
-		self.index += 1
 
-    		
-class Gunflash(pygame.sprite.Sprite):
-	frames = []
-
-	# Constructor
-	def __init__(self):
-		# Call the parent class (Sprite) constructor
-		pygame.sprite.Sprite.__init__(self)
-
-		# Get all frames
-		path = "data/img/gunflash/"
-		frames = [f for f in listdir(path) if isfile(join(path, f))]
-
-		# Put all frames in a list of Pygame images
-		self.images = []
-		for frame in frames:
-			self.images.append(pygame.image.load(path + frame))
-
-		self.index = 0
-		self.image = self.images[self.index]
-		self.rect = self.image.get_rect()
-
-		# Position
-		mousePos = pygame.mouse.get_pos()
-		self.rect.x = mousePos[0]-67
-		self.rect.y = mousePos[1]-67
-
-	def update(self):
-		if self.index >= len(self.images):
-			self.kill()
-		else:
-			self.image = self.images[self.index]
-			self.image.set_colorkey((0, 0, 0))
-		self.index += 1
+			# This will make sure that we repeat frames
+			# so animation looks a bit slower
+			if self.steps % self.frameRepeat == 0:
+				self.index += 1
+			self.steps += 1

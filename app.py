@@ -22,7 +22,7 @@ pygame.init()
 globals.winWidth = 1366
 globals.winHeight = 768
 fullscreen = True
-FPS = 30
+FPS = 60
 winBackground = colors.black
 win = game.window(globals.winWidth, globals.winHeight, pygame.FULLSCREEN, winBackground, "Silent City")
 
@@ -51,9 +51,11 @@ sndDie = (
     game.loadSound('snd/ah2.wav'), 
     game.loadSound('snd/ah3.wav')
 )
-
 sndShot = game.loadSound('snd/shot.wav')
 sndShot.set_volume(0.5)
+sndEmpty = game.loadSound('snd/empty.wav')
+sndShot.set_volume(0.5)
+sndReload = game.loadSound('snd/reload.wav')
 
 # Load and play music
 music = game.loadMusic('snd/music.mp3')
@@ -112,20 +114,23 @@ while run:
     pressed1, pressed2, pressed3 = pygame.mouse.get_pressed()
 
     if pressed1 and isShooting == False:
-        # Play shot sound
-        sndShot.play()
+        if gun.bulletsLeft > 0:
+            # Play shot sound
+            sndShot.play()
 
-        # Display gun shot
-        gunShot = weapons.Gunshot()
-        sprites.add(gunShot)
+            # Display gun shot
+            gunShot = weapons.Gunshot()
+            sprites.add(gunShot)
 
-        # Display gun flash
-        #gunFlash = weapons.Gunflash()
-        #sprites.add(gunFlash)
+            # Increment shots
+            globals.shots += 1
+            gun.bulletsLeft -= 1
+        else:
+            sndEmpty.play()
 
     # Check if the rect collided with the mouse pos
     # and if the left mouse button was pressed.
-    if pygame.sprite.collide_mask(foe, cursor) and pressed1: #foe.rect.collidepoint(pos)
+    if pygame.sprite.collide_mask(foe, cursor) and pressed1 and gun.bulletsLeft > 0: #foe.rect.collidepoint(pos)
         if isShooting == False:
             # Remove enemy
             foe.kill()
@@ -136,6 +141,8 @@ while run:
             # Make a new one
             foe = enemy.Enemy()
             sprites.add(foe)
+            # Add score & kills
+            globals.kills += 1
 
     # Check if player is shooting
     if pressed1:
@@ -143,19 +150,23 @@ while run:
 
         # Animate gun position
         if shotOnce == False:
-            if gun.rect.y < globals.winHeight - 140:
-                gun.rect.y += 5
-                if gun.rect.y == globals.winHeight - 140:
+            if gun.rect.y < globals.winHeight - 148:
+                gun.rect.y += 3
+                if gun.rect.y == globals.winHeight - 148:
                     shotOnce = True
         if shotOnce == True and gun.rect.y > globals.winHeight - 160:
-            gun.rect.y -= 5
+            gun.rect.y -= 3
     else:
         isShooting = False
 
         # Restore original gun position
         if gun.rect.y > globals.winHeight - 160:
-            gun.rect.y -= 5
+            gun.rect.y -= 3
         shotOnce = False
+
+    if pressed3 and gun.bulletsLeft == 0:
+        sndReload.play()
+        gun.bulletsLeft = 10
 
 
     # Check if enemy is out of boundry (screen)
@@ -165,11 +176,14 @@ while run:
         # Make a new one
         foe = enemy.Enemy()
         sprites.add(foe)
+        # Incriment missed
+        globals.missed += 1
 
     # Render screen
     sprites.update()
     sprites.draw(win)
     topSprites.update()
+    game.drawBullets(win, gun.bulletsLeft)
     topSprites.draw(win)
     pygame.display.update()
 

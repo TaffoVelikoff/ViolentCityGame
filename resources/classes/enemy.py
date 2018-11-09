@@ -8,7 +8,7 @@ from os.path import isfile, join
 
 class Enemy(pygame.sprite.Sprite):
 	selectedPos = 'left'
-	speed = 15
+	speed = 7
 	spriteWidth = 200
 
 	# Constructor

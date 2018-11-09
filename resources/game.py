@@ -50,3 +50,10 @@ def loadBackground():
 
     # Load the selected and scale for resolution
     return pygame.transform.scale(pygame.image.load(path + img).convert(), (globals.winWidth, globals.winHeight))
+
+def drawBullets(screen, bulletsLeft):
+    for bullet in range(0, bulletsLeft):
+       screen.blit(pygame.image.load(os.path.join(globals.data_dir, 'img/bullet.png')), (globals.winWidth - 32 - (bullet * 16), 16))
+
+    if bulletsLeft == 0:
+        screen.blit(pygame.image.load(os.path.join(globals.data_dir, 'img/info/reload.png')), (globals.winWidth - 240, 16))
