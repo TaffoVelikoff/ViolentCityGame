@@ -22,6 +22,11 @@ maxMissed = 20
 level = 1 # Enemy speed = starting speed + level
 nextLevelKills = 10 # After how many kills should we raise the level
 
+# Maximum bullets
 gunMaxBullets = 10
+
+# Stars
+stars = []
+maxStars = 200
 
 roomInit = False

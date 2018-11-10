@@ -74,6 +74,9 @@ statusBarImage = pygame.image.load(os.path.join(globals.data_dir, 'img/status_ba
 imgOhSnap = pygame.image.load(os.path.join(globals.data_dir, 'img/oh_snap.png'))
 imgReplay = pygame.image.load(os.path.join(globals.data_dir, 'img/replay.png'))
 
+# Generate stars
+game.generateStars()
+
 # Clock
 clock = pygame.time.Clock()
 
@@ -220,11 +223,9 @@ while run:
             if globals.missed == globals.maxMissed:
                 room = 'game_over'
 
-        # Limit frame rate
-        clock.tick(FPS)
-
         # Render screen
         win.blit(bg, (0, 0))
+        game.drawStars(win)
         sprites.update()
         sprites.draw(win)
         topSprites.update()
@@ -242,8 +243,12 @@ while run:
             globals.roomInit = True
 
         win.blit(bg, (0, 0))
+        game.drawStars(win)
         game.drawGameOver(win, imgOhSnap, imgReplay)
         pygame.display.update()
+    
+    # Limit frame rate
+    clock.tick(FPS)
 
 # Exiting game
 quit()

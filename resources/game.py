@@ -92,6 +92,22 @@ def drawGameOver(screen, imgOhSnap, imgReplay):
     screen.blit(imgOhSnap, (12, 12))
     screen.blit(imgReplay, (globals.winWidth/2 - 190, globals.winHeight/2 - 30))
 
+# Generate random stars
+def generateStars():
+    globals.stars = [
+      [random.randint(0, globals.winWidth),random.randint(0, globals.winHeight)]
+      for x in range(globals.maxStars)
+    ]
+
+# Draw the stars
+def drawStars(win):
+    for star in globals.stars:
+        pygame.draw.line(win, colors.white, (star[0], star[1]), (star[0], star[1]))
+        star[0] = star[0] - 1
+        if star[0] < 0:
+            star[0] = globals.winWidth
+            star[1] = random.randint(0, globals.winHeight)
+
 # Clear scores and stuff
 def clear():
     globals.kills = 0
