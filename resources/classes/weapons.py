@@ -22,12 +22,13 @@ class Crosshair(pygame.sprite.Sprite):
 		self.rect.y = mousePos[1]-16
     		
 class Gun(pygame.sprite.Sprite):
-	bulletsLeft = 10
+	bulletsLeft = 0
 
 	# Constructor
 	def __init__(self):
 		# Call the parent class (Sprite) constructor
 		pygame.sprite.Sprite.__init__(self)
+		self.bulletsLeft = globals.gunMaxBullets
 		self.image = pygame.image.load(os.path.join(globals.data_dir, 'img/gun.png'))
 		self.rect = self.image.get_rect()
 		self.rect.center = (229, 181)

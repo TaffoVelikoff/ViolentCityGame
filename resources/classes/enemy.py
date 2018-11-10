@@ -8,7 +8,7 @@ from os.path import isfile, join
 
 class Enemy(pygame.sprite.Sprite):
 	selectedPos = 'left'
-	speed = 7
+	speed = 0
 	spriteWidth = 200
 
 	# Constructor
@@ -17,8 +17,12 @@ class Enemy(pygame.sprite.Sprite):
 		# Call the parent class (Sprite) constructor
 		pygame.sprite.Sprite.__init__(self)
 
+		# Enemy image
 		self.image = pygame.image.load(os.path.join(globals.data_dir, 'img/enemy/01.png'))
 		self.rect = self.image.get_rect()
+
+		# Speed
+		self.speed = 5 + globals.level
 
 		# Create mask
 		self.mask = pygame.mask.from_surface(self.image)

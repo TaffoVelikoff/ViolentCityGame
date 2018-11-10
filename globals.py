@@ -12,4 +12,16 @@ winHeight = 768
 kills = 0
 score = 0
 shots = 0
+scorePerKill = 2 # How many points per kill per level
+
+# Missed
 missed = 0
+maxMissed = 20 
+
+# Enemy speed
+level = 1 # Enemy speed = starting speed + level
+nextLevelKills = 10 # After how many kills should we raise the level
+
+gunMaxBullets = 10
+
+roomInit = False

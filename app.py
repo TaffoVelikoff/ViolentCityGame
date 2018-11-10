@@ -17,6 +17,11 @@ from resources.scripts import colors
 
 # Init pygame
 pygame.init()
+pygame.font.init()
+
+# Load fonts
+font = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/LeelawUI.ttf'), 16)
+fontSmall = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/LeelUIsl.ttf'), 14)
 
 # Game window
 globals.winWidth = 1366
@@ -45,6 +50,9 @@ sprites.add(foe)
 isShooting = False
 shotOnce = False
 
+# Reloading
+isReloading = False
+
 # Load sounds
 sndDie = (
     game.loadSound('snd/ah.wav'), 
@@ -56,14 +64,15 @@ sndShot.set_volume(0.5)
 sndEmpty = game.loadSound('snd/empty.wav')
 sndShot.set_volume(0.5)
 sndReload = game.loadSound('snd/reload.wav')
+sndGameOver = game.loadSound('snd/game_over.wav')
+sndRebirth = game.loadSound('snd/rebirth.wav')
+sndRebirth.set_volume(0.6)
 
-# Load and play music
-music = game.loadMusic('snd/music.mp3')
-music.play(-1)
-pygame.mixer.music.set_volume(0.7)
-
-# Load background
+# Load spriotes background
 bg = game.loadBackground()
+statusBarImage = pygame.image.load(os.path.join(globals.data_dir, 'img/status_bar.png'))
+imgOhSnap = pygame.image.load(os.path.join(globals.data_dir, 'img/oh_snap.png'))
+imgReplay = pygame.image.load(os.path.join(globals.data_dir, 'img/replay.png'))
 
 # Clock
 clock = pygame.time.Clock()
@@ -71,21 +80,23 @@ clock = pygame.time.Clock()
 # Hide cursor
 pygame.mouse.set_cursor((8,8),(0,0),(0,0,0,0,0,0,0,0),(0,0,0,0,0,0,0,0))
 
-# App running
-run = True
+# Starting room
+room = 'main'
+
+# Load and play music
+musicMain = game.loadMusic('snd/music.mp3')
+musicMain.play(-1)
+pygame.mixer.music.set_volume(0.7)
 
 # Sleep for a while so the first enemy 
 # doesn't reach the end of the screen
 time.sleep(1.5)
 
+# App running
+run = True
+
 # Game loop
 while run:
-
-    # Limit frame rate
-    clock.tick(FPS)
-
-    # Blit background
-    win.blit(bg, (0, 0))
 
     # Handle events
     for event in pygame.event.get():
@@ -99,6 +110,7 @@ while run:
             # ESC
             if event.key == pygame.K_ESCAPE:
                 run = False
+                room = 'quit'
 
             # Full screen
             if event.key == pygame.K_F4:
@@ -109,83 +121,129 @@ while run:
                     pygame.display.set_mode((globals.winWidth, globals.winHeight))
                     fullscreen = False
 
+            # Replay game
+            if room == 'game_over':
+                if event.key == pygame.K_SPACE:
+                    # Clear all score and stuff
+                    game.clear()
+                    # Play sound
+                    sndRebirth.play()
+                    # Restart bullets
+                    gun.bulletsLeft = globals.gunMaxBullets
+                    # Create an enemy
+                    foe = enemy.Enemy()
+                    sprites.add(foe)
+                    # Switch rooms
+                    room = 'main'
+
     # Mouse position and button clicking.
     pos = pygame.mouse.get_pos()
     pressed1, pressed2, pressed3 = pygame.mouse.get_pressed()
 
-    if pressed1 and isShooting == False:
-        if gun.bulletsLeft > 0:
-            # Play shot sound
-            sndShot.play()
+    # Main Room
+    if room == 'main':
+        # Shooting
+        if pressed1 and isShooting == False:
+            if gun.bulletsLeft > 0:
+                # Play shot sound
+                sndShot.play()
 
-            # Display gun shot
-            gunShot = weapons.Gunshot()
-            sprites.add(gunShot)
+                # Display gun shot
+                gunShot = weapons.Gunshot()
+                sprites.add(gunShot)
 
-            # Increment shots
-            globals.shots += 1
-            gun.bulletsLeft -= 1
+                # Increment shots
+                globals.shots += 1
+                gun.bulletsLeft -= 1
+            else:
+                sndEmpty.play()
+
+        # Check if the rect collided with the mouse pos
+        # and if the left mouse button was pressed.
+        if pygame.sprite.collide_mask(foe, cursor) and pressed1 and gun.bulletsLeft > 0:
+            if isShooting == False:
+                # Remove enemy
+                foe.kill()
+                # Play die sound
+                random.choice(sndDie).play()
+                blood = enemy.Blood()
+                sprites.add(blood)
+                # Make a new one
+                foe = enemy.Enemy()
+                sprites.add(foe)
+                # Add score & kills
+                globals.kills += 1
+                # Check if we should raise a level
+                if globals.kills % globals.nextLevelKills == 0:
+                    globals.level += 1
+                game.incrementScore()
+
+        # Check if player is shooting
+        if pressed1:
+            isShooting = True
+
+            # Animate gun position
+            if shotOnce == False:
+                if gun.rect.y < globals.winHeight - 148:
+                    gun.rect.y += 3
+                    if gun.rect.y == globals.winHeight - 148:
+                        shotOnce = True
+            if shotOnce == True and gun.rect.y > globals.winHeight - 160:
+                gun.rect.y -= 3
         else:
-            sndEmpty.play()
+            isShooting = False
 
-    # Check if the rect collided with the mouse pos
-    # and if the left mouse button was pressed.
-    if pygame.sprite.collide_mask(foe, cursor) and pressed1 and gun.bulletsLeft > 0: #foe.rect.collidepoint(pos)
-        if isShooting == False:
+            # Restore original gun position
+            if gun.rect.y > globals.winHeight - 160:
+                gun.rect.y -= 3
+            shotOnce = False
+
+        if pressed3 and gun.bulletsLeft == 0 and isReloading == False:
+            sndReload.play()
+            gun.bulletsLeft = 10
+
+        if pressed3:
+            isReloading = True
+        else:
+            isReloading = False
+
+        # Check if enemy is out of boundry (screen)
+        if(foe.rect.x > globals.winWidth or foe.rect.y > globals.winHeight or foe.rect.x < 1-foe.spriteWidth or foe.rect.y < 1-foe.spriteWidth):
             # Remove enemy
             foe.kill()
-            # Play die sound
-            random.choice(sndDie).play()
-            blood = enemy.Blood()
-            sprites.add(blood)
             # Make a new one
             foe = enemy.Enemy()
             sprites.add(foe)
-            # Add score & kills
-            globals.kills += 1
+            # Increment missed
+            globals.missed += 1
+            # Game over if missed too much
+            if globals.missed == globals.maxMissed:
+                room = 'game_over'
 
-    # Check if player is shooting
-    if pressed1:
-        isShooting = True
+        # Limit frame rate
+        clock.tick(FPS)
 
-        # Animate gun position
-        if shotOnce == False:
-            if gun.rect.y < globals.winHeight - 148:
-                gun.rect.y += 3
-                if gun.rect.y == globals.winHeight - 148:
-                    shotOnce = True
-        if shotOnce == True and gun.rect.y > globals.winHeight - 160:
-            gun.rect.y -= 3
-    else:
-        isShooting = False
+        # Render screen
+        win.blit(bg, (0, 0))
+        sprites.update()
+        sprites.draw(win)
+        topSprites.update()
+        game.drawBullets(win, gun.bulletsLeft)
+        game.drawStatusbar(win, statusBarImage, font, fontSmall)
+        topSprites.draw(win)
+        pygame.display.update()
 
-        # Restore original gun position
-        if gun.rect.y > globals.winHeight - 160:
-            gun.rect.y -= 3
-        shotOnce = False
+    # Game over screen
+    if room == 'game_over':
+        if globals.roomInit == False:
+            # Play sound
+            foe.kill()
+            sndGameOver.play()
+            globals.roomInit = True
 
-    if pressed3 and gun.bulletsLeft == 0:
-        sndReload.play()
-        gun.bulletsLeft = 10
-
-
-    # Check if enemy is out of boundry (screen)
-    if(foe.rect.x > globals.winWidth or foe.rect.y > globals.winHeight or foe.rect.x < 1-foe.spriteWidth or foe.rect.y < 1-foe.spriteWidth):
-        # Remove enemy
-        foe.kill()
-        # Make a new one
-        foe = enemy.Enemy()
-        sprites.add(foe)
-        # Incriment missed
-        globals.missed += 1
-
-    # Render screen
-    sprites.update()
-    sprites.draw(win)
-    topSprites.update()
-    game.drawBullets(win, gun.bulletsLeft)
-    topSprites.draw(win)
-    pygame.display.update()
+        win.blit(bg, (0, 0))
+        game.drawGameOver(win, imgOhSnap, imgReplay)
+        pygame.display.update()
 
 # Exiting game
 quit()
