@@ -18,7 +18,7 @@ class Enemy(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 
 		# Enemy image
-		self.image = pygame.image.load(os.path.join(globals.data_dir, 'img/enemy/01.png'))
+		self.image = pygame.image.load(os.path.join(globals.data_dir, 'img/enemy/01.png')).convert_alpha()
 		self.rect = self.image.get_rect()
 
 		# Speed
@@ -72,7 +72,7 @@ class Blood(pygame.sprite.Sprite):
 		# Put all frames in a list of Pygame images
 		self.images = []
 		for frame in frames:
-			self.images.append(pygame.image.load(path + frame))
+			self.images.append(pygame.image.load(path + frame).convert_alpha())
 
 		self.index = 0
 		self.image = self.images[self.index]

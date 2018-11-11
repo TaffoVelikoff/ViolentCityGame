@@ -1,5 +1,11 @@
 import os
 
+# Commented code bellow detects screen resolutin
+# on windows. Might be usful in near future
+#import ctypes
+#user32 = ctypes.windll.user32
+#width & hight - user32.GetSystemMetrics(0) & user32.GetSystemMetrics(1)
+
 # Define dirs
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 data_dir = os.path.join(main_dir, 'data')
@@ -20,13 +26,18 @@ maxMissed = 20
 
 # Enemy speed
 level = 1 # Enemy speed = starting speed + level
-nextLevelKills = 10 # After how many kills should we raise the level
+nextLevelKills = 15 # After how many kills should we raise the level
 
 # Maximum bullets
 gunMaxBullets = 10
 
 # Stars
 stars = []
+starsLayer2 = []
 maxStars = 200
 
+# Initialized room
 roomInit = False
+
+# Step counter
+steps = 0

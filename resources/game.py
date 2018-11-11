@@ -54,10 +54,10 @@ def loadBackground():
 # Draw remaining bullets (ammo)
 def drawBullets(screen, bulletsLeft):
     for bullet in range(0, bulletsLeft):
-       screen.blit(pygame.image.load(os.path.join(globals.data_dir, 'img/bullet.png')), (globals.winWidth - 32 - (bullet * 16), 16))
+       screen.blit(pygame.image.load(os.path.join(globals.data_dir, 'img/bullet.png')).convert_alpha(), (globals.winWidth - 32 - (bullet * 16), 16))
 
     if bulletsLeft == 0:
-        screen.blit(pygame.image.load(os.path.join(globals.data_dir, 'img/info/reload.png')), (globals.winWidth - 240, 16))
+        screen.blit(pygame.image.load(os.path.join(globals.data_dir, 'img/info/reload.png')).convert_alpha(), (globals.winWidth - 240, 16))
 
 # Draw the status bar
 def drawStatusbar(screen, statusBarImage, font, fontSmall):
@@ -68,19 +68,19 @@ def drawStatusbar(screen, statusBarImage, font, fontSmall):
     level = str(globals.level)
     if globals.level < 10:
         level = '0' + level
-    fontlevel = font.render(str(level), False, colors.white)
+    fontlevel = font.render(str(level), True, colors.white)
     screen.blit(fontlevel, (194, 29))
 
     # Draw kills
-    fontKills = font.render(str(globals.kills), False, colors.white)
+    fontKills = font.render(str(globals.kills), True, colors.white)
     screen.blit(fontKills, (78, 26))
 
     # Draw missed
-    fontMissed = font.render(str(globals.missed), False, colors.white)
+    fontMissed = font.render(str(globals.missed), True, colors.white)
     screen.blit(fontMissed, (78, 63))
 
     # Draw score
-    fontScore = fontSmall.render(str(globals.score), False, colors.white)
+    fontScore = fontSmall.render(str(globals.score), True, colors.white)
     screen.blit(fontScore, (74, 100))
 
 # increment score based on level & Kills
@@ -98,15 +98,32 @@ def generateStars():
       [random.randint(0, globals.winWidth),random.randint(0, globals.winHeight)]
       for x in range(globals.maxStars)
     ]
+    globals.starsLayer2 = [
+      [random.randint(0, globals.winWidth),random.randint(0, globals.winHeight)]
+      for x in range(globals.maxStars)
+    ]
 
 # Draw the stars
-def drawStars(win):
+def drawStars(win, layer2 = False):
     for star in globals.stars:
         pygame.draw.line(win, colors.white, (star[0], star[1]), (star[0], star[1]))
         star[0] = star[0] - 1
         if star[0] < 0:
             star[0] = globals.winWidth
             star[1] = random.randint(0, globals.winHeight)
+    if layer2 == True:
+        for star in globals.starsLayer2:
+            pygame.draw.line(win, colors.white, (star[0], star[1]), (star[0], star[1]))
+            star[0] = star[0] - 2
+            if star[0] < 0:
+                star[0] = globals.winWidth
+                star[1] = random.randint(0, globals.winHeight)
+
+# Draw the status bar
+def drawMainMenu(screen, font):
+    fontKills = font.render('PRESS SPACE TO START', True, colors.white)
+    textRect = fontKills.get_rect(center=(globals.winWidth/2, globals.winHeight/2 - 60))
+    screen.blit(fontKills, textRect)
 
 # Clear scores and stuff
 def clear():
