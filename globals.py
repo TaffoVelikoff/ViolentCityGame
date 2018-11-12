@@ -1,10 +1,13 @@
 import os
+import ctypes
 
 # Commented code bellow detects screen resolutin
 # on windows. Might be usful in near future
-#import ctypes
-#user32 = ctypes.windll.user32
-#width & hight - user32.GetSystemMetrics(0) & user32.GetSystemMetrics(1)
+
+# Detect current resolution
+user32 = ctypes.windll.user32
+sysWidth = user32.GetSystemMetrics(0)
+sysHeight = user32.GetSystemMetrics(1)
 
 # Define dirs
 main_dir = os.path.split(os.path.abspath(__file__))[0]
