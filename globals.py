@@ -28,6 +28,11 @@ maxMissed = 20
 level = 1 # Enemy speed = starting speed + level
 nextLevelKills = 15 # After how many kills should we raise the level
 
+# Draw killed enemy score
+enemyScore = [0, 0, 0, 0]
+enemyScorePos = 0
+enemyScorePosChange = False
+
 # Maximum bullets
 gunMaxBullets = 10
 

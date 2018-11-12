@@ -1,4 +1,5 @@
 import os
+import time
 import pygame
 import random
 import globals
@@ -124,6 +125,12 @@ def drawMainMenu(screen, font):
     fontKills = font.render('PRESS SPACE TO START', True, colors.white)
     textRect = fontKills.get_rect(center=(globals.winWidth/2, globals.winHeight/2 - 60))
     screen.blit(fontKills, textRect)
+
+# Show score for current kileld enemy
+def drawEnemyScore(screen, font, score, x, y, creationTime):
+    font = font.render('+' + str(score) + ' pts.', True, colors.white)
+    textRect = font.get_rect(center=(x + 100, y + 100 - globals.enemyScorePos))
+    screen.blit(font, textRect)
 
 # Clear scores and stuff
 def clear():

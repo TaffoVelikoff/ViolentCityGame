@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import pygame
 import random
 import globals
@@ -15,7 +16,8 @@ pygame.font.init()
 # Load fonts
 font = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/LeelawUI.ttf'), 16)
 fontSmall = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/LeelUIsl.ttf'), 14)
-fintElcwoodBig = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 68)
+fontElcwoodBig = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 68)
+fontElcwoodSmall = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 14)
 
 # Game window
 globals.winWidth = 1366
@@ -170,7 +172,7 @@ while run:
                 menuBlink = False
             
         if menuBlink == True:
-            game.drawMainMenu(win, fintElcwoodBig)
+            game.drawMainMenu(win, fontElcwoodBig)
         pygame.display.update()
         
     # Main Room
@@ -179,6 +181,10 @@ while run:
         # and if the left mouse button was pressed.
         if pygame.sprite.collide_mask(foe, cursor) and pressed1 and gun.bulletsLeft > 0:
             if isShooting == False:
+                # Show score for killed enemy
+                globals.enemyScore = [globals.scorePerKill * globals.level, foe.rect.x, foe.rect.y, int(time.time())]
+                globals.enemyScorePos = 0
+                globals.enemyScorePosChange = True
                 # Remove enemy
                 foe.kill()
                 # Play die sound
@@ -253,6 +259,17 @@ while run:
             if globals.missed == globals.maxMissed:
                 room = 'game_over'
 
+        # Animate current kill score
+        if globals.enemyScorePosChange == True:
+            if globals.enemyScorePos < 50:
+                globals.enemyScorePos += 2
+
+        # Clear old kill score text
+        if globals.enemyScore[3] + 1 < int(time.time()):
+            globals.enemyScore = [0, -500, -500, 0] # Put out of screen
+            globals.enemyScorePos = 0
+            globals.enemyScorePosChange = False
+
         # Render screen
         win.blit(bg, (0, 0))
         game.drawStars(win)
@@ -261,6 +278,12 @@ while run:
         topSprites.update()
         game.drawBullets(win, gun.bulletsLeft)
         game.drawStatusbar(win, statusBarImage, font, fontSmall)
+        game.drawEnemyScore(
+            win, fontElcwoodSmall, 
+            globals.enemyScore[0], 
+            globals.enemyScore[1], 
+            globals.enemyScore[2], 
+            globals.enemyScore[3])
         topSprites.draw(win)
         pygame.display.update()
 

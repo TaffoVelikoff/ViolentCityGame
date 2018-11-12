@@ -5,6 +5,7 @@ import globals
 from os import listdir
 from resources import game
 from os.path import isfile, join
+from resources.scripts import colors
 
 class Enemy(pygame.sprite.Sprite):
 	selectedPos = 'left'
@@ -89,6 +90,3 @@ class Blood(pygame.sprite.Sprite):
 		else:
 			self.image = self.images[self.index]
 		self.index += 1
-		
-		
-    		
