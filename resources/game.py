@@ -4,8 +4,8 @@ import pygame
 import random
 import globals
 from os import listdir
+from resources import colors
 from os.path import isfile, join
-from resources.scripts import colors
 
 # Game window
 def window(winWidth, winHeight, fullscreen, backgroundColor, caption):
@@ -169,6 +169,12 @@ def drawTime(screen, font, x, y):
     # Draw
     screen.blit(font, textRect)
 
+# Draw a funny phrase
+def drawPhrases(screen, font, x, y, phrase):
+    font = font.render(phrase, True, colors.white)
+    textRect = font.get_rect(center=(x, y))
+    screen.blit(font, textRect)
+
 # Draw seconds (for debugging purpose)
 def drawSeconds(screen, font, x, y):
     font = font.render('Timer: ' + str(int(globals.steps/60)), True, colors.white)
@@ -176,7 +182,7 @@ def drawSeconds(screen, font, x, y):
     screen.blit(font, textRect)
 
 # Draw debugger (for debugging purpose)
-def drawDebugger(screen, font, x, y, arg1 = None, arg2 = None):
+def drawDebugger(screen, font, x, y, arg1, arg2):
     font = font.render(arg1 + ' ' + arg2, True, colors.white)
     textRect = font.get_rect(center=(x, y))
     screen.blit(font, textRect)

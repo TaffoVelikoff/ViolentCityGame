@@ -5,10 +5,11 @@ import pygame
 import random
 import globals
 from resources import game
+from resources import colors
+from resources import phrases
 from resources.classes import enemy
 from resources.classes import weapons
 from resources.classes import powerup
-from resources.scripts import colors
 
 # Init pygame
 pygame.init()
@@ -20,6 +21,7 @@ fontSmall = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/LeelUIsl.ttf'
 fontElcwoodBig = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 68)
 fontElcwoodSmall = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 14)
 fontElcwoodMedium = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 30)
+fontCaviar = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/CaviarDreams_Bold.ttf'), 26)
 
 # Game window
 globals.winWidth = 1366
@@ -342,6 +344,8 @@ while run:
             game.drawPowerUpText(win, fontElcwoodMedium, globals.powerText, 18, globals.winHeight - 48)
         if globals.debug == True:
             game.drawSeconds(win, font, 68, 142)
+            game.drawDebugger(win, fontCaviar, globals.winWidth/2, globals.winHeight/2, '', '')
+        #game.drawPhrases(win, fontCaviar, globals.winWidth/2, 32, phrases.items[1])
         game.drawTime(win, font, 182, 63)
         pygame.display.update()
         ### END RENDER SCREEN ###

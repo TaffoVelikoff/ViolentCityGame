@@ -3,9 +3,7 @@ import pygame
 import random
 import globals
 from os import listdir
-from resources import game
 from os.path import isfile, join
-from resources.scripts import colors
 
 class BulletPlus(pygame.sprite.Sprite):
 

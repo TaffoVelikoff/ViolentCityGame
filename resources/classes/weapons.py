@@ -2,7 +2,6 @@ import os
 import pygame
 import globals
 from os import listdir
-from resources import game
 from os.path import isfile, join
 
 class Crosshair(pygame.sprite.Sprite):
