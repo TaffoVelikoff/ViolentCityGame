@@ -8,18 +8,20 @@ from os.path import isfile, join
 class Crosshair(pygame.sprite.Sprite):
 
 	# Constructor
-	def __init__(self):
+	def __init__(self, xOffset = 16, yOffset = 16):
 		# Call the parent class (Sprite) constructor
 		pygame.sprite.Sprite.__init__(self)
 		self.image = pygame.image.load(os.path.join(globals.data_dir, 'img/crosshair.png'))
 		self.mask = pygame.mask.from_surface(self.image)
 		self.rect = self.image.get_rect()
 		self.rect.center = (16, 16)
+		self.xOffset = xOffset
+		self.yOffset = yOffset
 
 	def update(self):
 		mousePos = pygame.mouse.get_pos()
-		self.rect.x = mousePos[0]-16
-		self.rect.y = mousePos[1]-16
+		self.rect.x = mousePos[0] - self.xOffset
+		self.rect.y = mousePos[1] - self.yOffset
     		
 class Gun(pygame.sprite.Sprite):
 	bulletsLeft = 0

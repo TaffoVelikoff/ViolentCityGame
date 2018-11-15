@@ -62,7 +62,10 @@ class Blood(pygame.sprite.Sprite):
 	frames = []
 
 	# Constructor
-	def __init__(self):
+	def __init__(self, x, y):
+		# Counter
+		self.steps = 0
+
 		# Call the parent class (Sprite) constructor
 		pygame.sprite.Sprite.__init__(self)
 
@@ -81,12 +84,18 @@ class Blood(pygame.sprite.Sprite):
 
 		# Position
 		mousePos = pygame.mouse.get_pos()
-		self.rect.x = mousePos[0] - 79
-		self.rect.y = mousePos[1] - 115
+		self.rect.x = x #mousePos[0] - 79
+		self.rect.y = y #mousePos[1] - 115
 
 	def update(self):
+		# ANIMATE AND KILL AFTER ANIMATION
 		if self.index >= len(self.images):
 			self.kill()
 		else:
 			self.image = self.images[self.index]
-		self.index += 1
+
+		# This will slow down animation
+		if self.steps % 2 == 0:
+			self.index += 1
+
+		self.steps += 1

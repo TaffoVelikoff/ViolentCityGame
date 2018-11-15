@@ -18,7 +18,7 @@ def window(winWidth, winHeight, fullscreen, backgroundColor, caption):
     return win
 
 # Load sound
-def loadSound(fileName):
+def loadSound(fileName, volume = 1):
     class NoneSound:
         def play(self): pass
     if not pygame.mixer or not pygame.mixer.get_init():
@@ -26,6 +26,7 @@ def loadSound(fileName):
     fullname = os.path.join(globals.data_dir, fileName)
     try:
         sound = pygame.mixer.Sound(fullname)
+        sound.set_volume(volume)
     except pygame.error:
         print ('Cannot load sound: %s' % fullname)
         raise SystemExit(str(geterror()))
@@ -130,6 +131,20 @@ def drawMainMenu(screen, font):
 def drawEnemyScore(screen, font, score, x, y, creationTime):
     font = font.render('+' + str(score) + ' pts.', True, colors.white)
     textRect = font.get_rect(center=(x + 100, y + 100 - globals.enemyScorePos))
+    screen.blit(font, textRect)
+
+# Draw a text when power-up is clicked
+def drawPowerUpText(screen, font, text, x, y):
+    font = font.render(text, True, colors.white)
+    textRect = font.get_rect()
+    textRect.x = x
+    textRect.y = y
+    screen.blit(font, textRect)
+
+# Draw seconds (for debuging purpose)
+def drawSeconds(screen, font, x, y):
+    font = font.render('Timer: ' + str(int(globals.steps/60)), True, colors.white)
+    textRect = font.get_rect(center=(x, y))
     screen.blit(font, textRect)
 
 # Clear scores and stuff

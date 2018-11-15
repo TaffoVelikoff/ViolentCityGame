@@ -7,6 +7,7 @@ import globals
 from resources import game
 from resources.classes import enemy
 from resources.classes import weapons
+from resources.classes import powerup
 from resources.scripts import colors
 
 # Init pygame
@@ -18,18 +19,19 @@ font = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/LeelawUI.ttf'), 16
 fontSmall = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/LeelUIsl.ttf'), 14)
 fontElcwoodBig = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 68)
 fontElcwoodSmall = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 14)
+fontElcwoodMedium = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 26)
 
 # Game window
-globals.winWidth = 1366
-globals.winHeight = 768
+globals.winWidth = 1920
+globals.winHeight = 1080
 fullscreen = True
-FPS = 60
 winBackground = colors.black
 win = game.window(globals.winWidth, globals.winHeight, pygame.FULLSCREEN, winBackground, "Silent City")
 
 # Sprites
 sprites = pygame.sprite.Group()
 topSprites = pygame.sprite.Group()
+pwrSprites = pygame.sprite.Group()
 
 # Crosshair & Guns
 cursor = weapons.Crosshair()
@@ -51,18 +53,16 @@ isReloading = False
 
 # Load sounds
 sndDie = (
-    game.loadSound('snd/ah.wav'), 
-    game.loadSound('snd/ah2.wav'), 
-    game.loadSound('snd/ah3.wav')
+    game.loadSound('snd/ah.wav', 0.9),
+    game.loadSound('snd/ah2.wav', 0.9),
+    game.loadSound('snd/ah3.wav', 0.9)
 )
-sndShot = game.loadSound('snd/shot.wav')
-sndShot.set_volume(0.5)
+sndShot = game.loadSound('snd/shot.wav', 0.5)
 sndEmpty = game.loadSound('snd/empty.wav')
-sndShot.set_volume(0.5)
 sndReload = game.loadSound('snd/reload.wav')
 sndGameOver = game.loadSound('snd/game_over.wav')
-sndRebirth = game.loadSound('snd/rebirth.wav')
-sndRebirth.set_volume(0.6)
+sndRebirth = game.loadSound('snd/rebirth.wav', 0.5)
+sndRicochet = game.loadSound('snd/ricochet.wav')
 
 # Load spriotes background
 bg = game.loadBackground()
@@ -110,6 +110,8 @@ while run:
 
             # ESC
             if event.key == pygame.K_ESCAPE:
+
+                globals.roomInit = False
                 if room == 'main':
                     # Clear all score and stuff
                     game.clear()
@@ -117,6 +119,8 @@ while run:
                     gun.bulletsLeft = globals.gunMaxBullets
                     # Kill existing enemy
                     foe.kill()
+                    # Destroy powerups
+                    pwrBullets.kill()
                     # Create an enemy
                     foe = enemy.Enemy()
                     sprites.add(foe)
@@ -177,29 +181,69 @@ while run:
         
     # Main Room
     if room == 'main':
-        # Check if the rect collided with the mouse pos
-        # and if the left mouse button was pressed.
-        if pygame.sprite.collide_mask(foe, cursor) and pressed1 and gun.bulletsLeft > 0:
+        # Init room
+        if globals.roomInit == False:
+            # Restart steps for room
+            globals.steps = 1
+            # Powerups
+            pwrBullets = powerup.BulletPlus()
+
+            globals.roomInit = True
+
+        # POWERUPS
+        # Had some issues with clock.ste_timer...
+        if globals.steps % (globals.second * globals.timerPowerUp) == 0:
+            ### CREATE AFTER {globals.timerPowerUp} SECONDS ###
+            pwrSprites.add(pwrBullets)
+            pwrBullets.appeared = globals.steps # Last time powerup appeared
+        if globals.steps % (pwrBullets.appeared + (globals.second * globals.timerPowerUpDestroy)) == 0:
+            ### DESTROY AFTER {globals.timerPowerUpDestroy} SECONDS ###
+            pwrBullets.kill()
+
+        # Check if left click and we still got bullets
+        if pressed1 and gun.bulletsLeft > 0:
             if isShooting == False:
-                # Show score for killed enemy
-                globals.enemyScore = [globals.scorePerKill * globals.level, foe.rect.x, foe.rect.y, int(time.time())]
-                globals.enemyScorePos = 0
-                globals.enemyScorePosChange = True
-                # Remove enemy
-                foe.kill()
-                # Play die sound
-                random.choice(sndDie).play()
-                blood = enemy.Blood()
-                sprites.add(blood)
-                # Make a new one
-                foe = enemy.Enemy()
-                sprites.add(foe)
-                # Add score & kills
-                globals.kills += 1
-                # Check if we should raise a level
-                if globals.kills % globals.nextLevelKills == 0:
-                    globals.level += 1
-                game.incrementScore()
+
+                # Kill enemy
+                if pygame.sprite.collide_mask(foe, cursor):
+                    # Show score for killed enemy
+                    globals.enemyScore = [globals.scorePerKill * globals.level, foe.rect.x, foe.rect.y, int(time.time())]
+                    globals.enemyScorePos = 0
+                    globals.enemyScorePosChange = True
+                    # Play die sound
+                    random.choice(sndDie).play()
+                    blood = enemy.Blood(foe.rect.x, foe.rect.y)
+                    sprites.add(blood)
+                    # Remove enemy
+                    foe.kill()
+                    # Make a new one
+                    foe = enemy.Enemy()
+                    sprites.add(foe)
+                    # Add score & kills
+                    globals.kills += 1
+                    # Check if we should raise a level
+                    if globals.kills % globals.nextLevelKills == 0:
+                        globals.level += 1
+                    game.incrementScore()
+
+                # Get power up
+                if pygame.sprite.collide_mask(pwrBullets, cursor):
+                    # Play sound
+                    sndRicochet.play()
+                    # EXAMPLE: +3 bullets (-1 for shooting and + 3 bonus = +2 new bullets)
+                    gun.bulletsLeft += 1 + globals.pwrBulletsAmount
+                    # Animate destroy
+                    pwrBulletsKill = powerup.BulletPlusGone(pwrBullets.rect.x, pwrBullets.rect.y)
+                    pwrSprites.add(pwrBulletsKill)
+                    # Destroy powerup icon
+                    pwrBullets.kill()
+                    # Draw power-up text
+                    globals.powerText = '+' + str(globals.pwrBulletsAmount) + ' bullets!'
+                    globals.drawPowerText = True
+                    globals.drawPowerTextStart = globals.steps
+                    # Change x,y of power up
+                    pwrBullets.rect.x = random.randint(1, globals.winWidth - 140)
+                    pwrBullets.rect.y = random.randint(100, globals.winHeight - 140)
 
         # Shooting
         if pressed1 and isShooting == False:
@@ -270,14 +314,20 @@ while run:
             globals.enemyScorePos = 0
             globals.enemyScorePosChange = False
 
+        # Clear power-up text
+        if globals.drawPowerTextStart != 0 and globals.steps % (globals.drawPowerTextStart + (globals.second*3)) == 0:
+            globals.drawPowerText = False
+
         # Render screen
         win.blit(bg, (0, 0))
         game.drawStars(win)
         sprites.update()
         sprites.draw(win)
+        pwrSprites.update()
         topSprites.update()
         game.drawBullets(win, gun.bulletsLeft)
         game.drawStatusbar(win, statusBarImage, font, fontSmall)
+        pwrSprites.draw(win)
         game.drawEnemyScore(
             win, fontElcwoodSmall, 
             globals.enemyScore[0], 
@@ -285,13 +335,19 @@ while run:
             globals.enemyScore[2], 
             globals.enemyScore[3])
         topSprites.draw(win)
+        if globals.drawPowerText == True:
+            game.drawPowerUpText(win, fontElcwoodMedium, globals.powerText, 18, globals.winHeight - 64)
+        game.drawSeconds(win, font, 68, 142)
         pygame.display.update()
 
     # Game over screen
     if room == 'game_over':
         if globals.roomInit == False:
-            # Play sound
+            # Destroy powerups
+            pwrBullets.kill()
+            # Kill enemy
             foe.kill()
+            # Play game over sound
             sndGameOver.play()
             globals.roomInit = True
 
@@ -301,7 +357,7 @@ while run:
         pygame.display.update()
     
     # Limit frame rate
-    clock.tick(FPS)
+    clock.tick(globals.FPS)
 
 # Exiting game
 quit()

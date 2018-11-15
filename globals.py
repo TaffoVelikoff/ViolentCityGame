@@ -36,6 +36,10 @@ enemyScore = [0, 0, 0, 0]
 enemyScorePos = 0
 enemyScorePosChange = False
 
+# Timers
+timerPowerUp = 30 # How many seconds to create a new power up
+timerPowerUpDestroy = 5 # How many seconds a power up stays on screen
+
 # Maximum bullets
 gunMaxBullets = 10
 
@@ -44,8 +48,28 @@ stars = []
 starsLayer2 = []
 maxStars = 200
 
+# This will help us draw a text when 
+# a power-up has been collected
+powerText = ''
+drawPowerText = False
+drawPowerTextStart = 0
+
+# Power-ups
+pwrBulletsAmount = 10 # How many bullets should be added for the BulletPlus()
+
 # Initialized room
 roomInit = False
+
+# Fremes per second
+FPS = 60
+
+# Minute (how many steps in minute)
+minute = FPS*60
+
+# Seconds (how many steps in second)
+# It's the FPS, but a var "second" makes the code
+# more readible...
+second = FPS
 
 # Step counter
 steps = 0
