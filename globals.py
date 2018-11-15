@@ -17,6 +17,9 @@ data_dir = os.path.join(main_dir, 'data')
 winWidth = 1366
 winHeight = 768
 
+# Debug Mode
+debug = False
+
 # Score & stats
 kills = 0
 score = 0
@@ -38,7 +41,7 @@ enemyScorePosChange = False
 
 # Timers
 timerPowerUp = 30 # How many seconds to create a new power up
-timerPowerUpDestroy = 5 # How many seconds a power up stays on screen
+timerPowerUpDestroy = 3 # How many seconds a power up stays on screen
 
 # Maximum bullets
 gunMaxBullets = 10

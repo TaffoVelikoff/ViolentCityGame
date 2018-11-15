@@ -19,11 +19,11 @@ font = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/LeelawUI.ttf'), 16
 fontSmall = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/LeelUIsl.ttf'), 14)
 fontElcwoodBig = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 68)
 fontElcwoodSmall = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 14)
-fontElcwoodMedium = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 26)
+fontElcwoodMedium = pygame.font.Font(os.path.join(globals.data_dir, 'fonts/elkwood.ttf'), 30)
 
 # Game window
-globals.winWidth = 1920
-globals.winHeight = 1080
+globals.winWidth = 1366
+globals.winHeight = 768
 fullscreen = True
 winBackground = colors.black
 win = game.window(globals.winWidth, globals.winHeight, pygame.FULLSCREEN, winBackground, "Silent City")
@@ -183,11 +183,11 @@ while run:
     if room == 'main':
         # Init room
         if globals.roomInit == False:
+            # Init power-ups
+            pwrBullets = powerup.BulletPlus()
+            pwrBullets.putOutOfScreen()
             # Restart steps for room
             globals.steps = 1
-            # Powerups
-            pwrBullets = powerup.BulletPlus()
-
             globals.roomInit = True
 
         # POWERUPS
@@ -196,9 +196,12 @@ while run:
             ### CREATE AFTER {globals.timerPowerUp} SECONDS ###
             pwrSprites.add(pwrBullets)
             pwrBullets.appeared = globals.steps # Last time powerup appeared
+            pwrBullets.rect.x = random.randint(1, globals.winWidth - 140)
+            pwrBullets.rect.y = random.randint(100, globals.winHeight - 140)
         if globals.steps % (pwrBullets.appeared + (globals.second * globals.timerPowerUpDestroy)) == 0:
             ### DESTROY AFTER {globals.timerPowerUpDestroy} SECONDS ###
             pwrBullets.kill()
+            pwrBullets.putOutOfScreen()
 
         # Check if left click and we still got bullets
         if pressed1 and gun.bulletsLeft > 0:
@@ -206,14 +209,15 @@ while run:
 
                 # Kill enemy
                 if pygame.sprite.collide_mask(foe, cursor):
+                    # Make blood
+                    blood = enemy.Blood()
+                    sprites.add(blood)
                     # Show score for killed enemy
-                    globals.enemyScore = [globals.scorePerKill * globals.level, foe.rect.x, foe.rect.y, int(time.time())]
+                    globals.enemyScore = [globals.scorePerKill * globals.level, blood.rect.x, blood.rect.y, int(time.time())]
                     globals.enemyScorePos = 0
                     globals.enemyScorePosChange = True
                     # Play die sound
                     random.choice(sndDie).play()
-                    blood = enemy.Blood(foe.rect.x, foe.rect.y)
-                    sprites.add(blood)
                     # Remove enemy
                     foe.kill()
                     # Make a new one
@@ -234,16 +238,14 @@ while run:
                     gun.bulletsLeft += 1 + globals.pwrBulletsAmount
                     # Animate destroy
                     pwrBulletsKill = powerup.BulletPlusGone(pwrBullets.rect.x, pwrBullets.rect.y)
-                    pwrSprites.add(pwrBulletsKill)
+                    topSprites.add(pwrBulletsKill)
                     # Destroy powerup icon
                     pwrBullets.kill()
                     # Draw power-up text
                     globals.powerText = '+' + str(globals.pwrBulletsAmount) + ' bullets!'
                     globals.drawPowerText = True
                     globals.drawPowerTextStart = globals.steps
-                    # Change x,y of power up
-                    pwrBullets.rect.x = random.randint(1, globals.winWidth - 140)
-                    pwrBullets.rect.y = random.randint(100, globals.winHeight - 140)
+                    pwrBullets.putOutOfScreen()
 
         # Shooting
         if pressed1 and isShooting == False:
@@ -281,7 +283,7 @@ while run:
                 gun.rect.y -= 3
             shotOnce = False
 
-        if pressed3 and gun.bulletsLeft == 0 and isReloading == False:
+        if pressed3 and not pressed1 and gun.bulletsLeft == 0 and isReloading == False:
             sndReload.play()
             gun.bulletsLeft = globals.gunMaxBullets
 
@@ -319,7 +321,7 @@ while run:
         if globals.drawPowerTextStart != 0 and globals.steps % (globals.drawPowerTextStart + (globals.second*3)) == 0:
             globals.drawPowerText = False
 
-        # Render screen
+        ### RENDER SCREEN ###
         win.blit(bg, (0, 0))
         game.drawStars(win)
         sprites.update()
@@ -337,9 +339,12 @@ while run:
             globals.enemyScore[3])
         topSprites.draw(win)
         if globals.drawPowerText == True:
-            game.drawPowerUpText(win, fontElcwoodMedium, globals.powerText, 18, globals.winHeight - 64)
-        game.drawSeconds(win, font, 68, 142)
+            game.drawPowerUpText(win, fontElcwoodMedium, globals.powerText, 18, globals.winHeight - 48)
+        if globals.debug == True:
+            game.drawSeconds(win, font, 68, 142)
+        game.drawTime(win, font, 182, 63)
         pygame.display.update()
+        ### END RENDER SCREEN ###
 
     # Game over screen
     if room == 'game_over':

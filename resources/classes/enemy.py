@@ -23,7 +23,10 @@ class Enemy(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 
 		# Speed
-		self.speed = 5 + globals.level
+		if globals.debug == False:
+			self.speed = 5 + globals.level
+		else:
+			globals.speed = 0
 
 		# Create mask
 		self.mask = pygame.mask.from_surface(self.image)
@@ -62,7 +65,7 @@ class Blood(pygame.sprite.Sprite):
 	frames = []
 
 	# Constructor
-	def __init__(self, x, y):
+	def __init__(self, x = None, y = None):
 		# Counter
 		self.steps = 0
 
@@ -84,8 +87,8 @@ class Blood(pygame.sprite.Sprite):
 
 		# Position
 		mousePos = pygame.mouse.get_pos()
-		self.rect.x = x #mousePos[0] - 79
-		self.rect.y = y #mousePos[1] - 115
+		self.rect.x = mousePos[0] - 79
+		self.rect.y = mousePos[1] - 115
 
 	def update(self):
 		# ANIMATE AND KILL AFTER ANIMATION

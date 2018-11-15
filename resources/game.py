@@ -71,7 +71,7 @@ def drawStatusbar(screen, statusBarImage, font, fontSmall):
     if globals.level < 10:
         level = '0' + level
     fontlevel = font.render(str(level), True, colors.white)
-    screen.blit(fontlevel, (194, 29))
+    screen.blit(fontlevel, (184, 29))
 
     # Draw kills
     fontKills = font.render(str(globals.kills), True, colors.white)
@@ -141,9 +141,43 @@ def drawPowerUpText(screen, font, text, x, y):
     textRect.y = y
     screen.blit(font, textRect)
 
-# Draw seconds (for debuging purpose)
+# Draw time
+def drawTime(screen, font, x, y):
+    # Calculate Time
+    totalSeconds = int(globals.steps/60)
+    minutes = int(totalSeconds / 60)
+    seconds = int(totalSeconds - (minutes * 60))
+
+    # Add 0
+    if seconds < 10:
+        drawSec = '0' + str(seconds)
+    else:
+        drawSec = str(seconds)
+    if minutes < 10:
+        drawMin = '0' + str(minutes)
+    else:
+        drawMin = str(minutes)
+
+    # Init font
+    font = font.render(str(drawMin) + ':' + str(drawSec), True, colors.white)
+
+    # Position
+    textRect = font.get_rect()
+    textRect.x = x
+    textRect.y = y
+
+    # Draw
+    screen.blit(font, textRect)
+
+# Draw seconds (for debugging purpose)
 def drawSeconds(screen, font, x, y):
     font = font.render('Timer: ' + str(int(globals.steps/60)), True, colors.white)
+    textRect = font.get_rect(center=(x, y))
+    screen.blit(font, textRect)
+
+# Draw debugger (for debugging purpose)
+def drawDebugger(screen, font, x, y, arg1 = None, arg2 = None):
+    font = font.render(arg1 + ' ' + arg2, True, colors.white)
     textRect = font.get_rect(center=(x, y))
     screen.blit(font, textRect)
 

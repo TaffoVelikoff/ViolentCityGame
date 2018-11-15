@@ -27,6 +27,10 @@ class BulletPlus(pygame.sprite.Sprite):
 		# Place on screen
 		self.rect.center = (random.randint(1, globals.winWidth - 140), random.randint(100, globals.winHeight - 140))
 
+	def putOutOfScreen(self):
+		self.rect.x = -100
+		self.rect.y = -100
+
 class BulletPlusGone(pygame.sprite.Sprite):
 	frames = []
 
@@ -49,7 +53,6 @@ class BulletPlusGone(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 
 		# Position
-		mousePos = pygame.mouse.get_pos()
 		self.rect.x = x
 		self.rect.y = y
 
