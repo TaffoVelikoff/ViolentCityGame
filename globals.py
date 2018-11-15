@@ -25,7 +25,7 @@ scorePerKill = 2 # How many points per kill per level
 
 # Missed
 missed = 0
-maxMissed = 20 
+maxMissed = 20
 
 # Enemy speed
 level = 1 # Enemy speed = starting speed + level

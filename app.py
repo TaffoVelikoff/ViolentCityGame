@@ -301,6 +301,7 @@ while run:
             globals.missed += 1
             # Game over if missed too much
             if globals.missed == globals.maxMissed:
+                globals.roomInit = False
                 room = 'game_over'
 
         # Animate current kill score
