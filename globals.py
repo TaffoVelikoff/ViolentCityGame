@@ -1,5 +1,6 @@
 import os
 import ctypes
+import random
 
 # Commented code bellow detects screen resolutin
 # on windows. Might be usful in near future
@@ -56,6 +57,12 @@ maxStars = 200
 powerText = ''
 drawPowerText = False
 drawPowerTextStart = 0
+
+# This will help us draw the phrases
+phraseSteps = 0
+phraseOnScreen = False
+phraseDrawOnSec = random.randint(10, 20)
+selectedPhrase = ''
 
 # Power-ups
 pwrBulletsAmount = 10 # How many bullets should be added for the BulletPlus()

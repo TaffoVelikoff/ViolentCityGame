@@ -32,6 +32,7 @@ win = game.window(globals.winWidth, globals.winHeight, pygame.FULLSCREEN, winBac
 
 # Sprites
 sprites = pygame.sprite.Group()
+beerSprite = pygame.sprite.Group()
 topSprites = pygame.sprite.Group()
 pwrSprites = pygame.sprite.Group()
 
@@ -45,6 +46,10 @@ gunOffsetY = 0
 # Enemy
 foe = enemy.Enemy()
 sprites.add(foe)
+
+# Beer
+beer = enemy.Beer()
+beerClock = random.randint(25, 40)
 
 # Shooting
 isShooting = False
@@ -78,6 +83,9 @@ game.generateStars()
 
 # Blink menu
 menuBlink = False
+
+# Is drunk
+drunk = False
 
 # Clock
 clock = pygame.time.Clock()
@@ -121,8 +129,14 @@ while run:
                     gun.bulletsLeft = globals.gunMaxBullets
                     # Kill existing enemy
                     foe.kill()
+                    beer.kill()
                     # Destroy powerups
                     pwrBullets.kill()
+                    pwrBomb.kill()
+                    # Remove power-up text
+                    globals.drawPowerText = False
+                    # Restart phrase counter
+                    globals.phraseSteps = 0
                     # Create an enemy
                     foe = enemy.Enemy()
                     sprites.add(foe)
@@ -188,22 +202,36 @@ while run:
             # Init power-ups
             pwrBullets = powerup.BulletPlus()
             pwrBullets.putOutOfScreen()
+            pwrBomb = powerup.Bomb()
+            pwrBomb.putOutOfScreen()
             # Restart steps for room
             globals.steps = 1
             globals.roomInit = True
-
+            
         # POWERUPS
         # Had some issues with clock.ste_timer...
         if globals.steps % (globals.second * globals.timerPowerUp) == 0:
+            ### Choose power-up
+            pwrSelect = 0 #random.randint(0, 1)
+
             ### CREATE AFTER {globals.timerPowerUp} SECONDS ###
-            pwrSprites.add(pwrBullets)
-            pwrBullets.appeared = globals.steps # Last time powerup appeared
-            pwrBullets.rect.x = random.randint(1, globals.winWidth - 140)
-            pwrBullets.rect.y = random.randint(100, globals.winHeight - 140)
+            if pwrSelect == 0:
+                pwrSprites.add(pwrBullets)
+                pwrBullets.appeared = globals.steps # Last time powerup appeared
+                pwrBullets.rect.x = random.randint(1, globals.winWidth - 140)
+                pwrBullets.rect.y = random.randint(100, globals.winHeight - 140)
+            else :
+                pwrSprites.add(pwrBomb)
+                pwrBomb.appeared = globals.steps # Last time powerup appeared
+                pwrBomb.rect.x = random.randint(1, globals.winWidth - 140)
+                pwrBomb.rect.y = random.randint(100, globals.winHeight - 140)
         if globals.steps % (pwrBullets.appeared + (globals.second * globals.timerPowerUpDestroy)) == 0:
             ### DESTROY AFTER {globals.timerPowerUpDestroy} SECONDS ###
             pwrBullets.kill()
             pwrBullets.putOutOfScreen()
+        if globals.steps % (pwrBomb.appeared + (globals.second * globals.timerPowerUpDestroy)) == 0:
+            pwrBomb.kill()
+            pwrBomb.putOutOfScreen()
 
         # Check if left click and we still got bullets
         if pressed1 and gun.bulletsLeft > 0:
@@ -248,6 +276,29 @@ while run:
                     globals.drawPowerText = True
                     globals.drawPowerTextStart = globals.steps
                     pwrBullets.putOutOfScreen()
+                if pygame.sprite.collide_mask(pwrBomb, cursor):
+                    # Play sound
+                    sndRicochet.play()
+
+                    # GIVE BOMB
+
+                    # Animate destroy
+                    pwrBombKill = powerup.BombGone(pwrBullets.rect.x, pwrBullets.rect.y)
+                    topSprites.add(pwrBombKill)
+                    # Destroy powerup icon
+                    pwrBomb.kill()
+                    # Draw power-up text
+                    globals.powerText = '+ 5 bombs!'
+                    globals.drawPowerText = True
+                    globals.drawPowerTextStart = globals.steps
+                    pwrBomb.putOutOfScreen()
+
+                # Drink beer
+                if pygame.sprite.collide_mask(beer, cursor):
+                    beer.kill()
+                    drunk = True 
+                    drunkExpire = 10 * globals.second # Drunk mode should expire in X seconds
+                    beerClock = random.randint(25, 40)
 
         # Shooting
         if pressed1 and isShooting == False:
@@ -308,6 +359,23 @@ while run:
                 globals.roomInit = False
                 room = 'game_over'
 
+        # Check if beer is out of boundry (screen)
+        if(beer.rect.x > globals.winWidth or beer.rect.y > globals.winHeight or beer.rect.x < 1-beer.spriteWidth or beer.rect.y < 1-beer.spriteWidth):
+            # Destroy beer
+            beer.kill()
+            beerClock = random.randint(25, 40)
+
+        # Place a beer on the screen
+        if globals.steps % (beerClock * globals.second) == 0:
+            beer = enemy.Beer()
+            beerSprite.add(beer)
+
+        # Expire drunk mode
+        if drunk == True:
+            drunkExpire -= 1
+            if drunkExpire == 0:
+                drunk = False
+
         # Animate current kill score
         if globals.enemyScorePosChange == True:
             if globals.enemyScorePos < 50:
@@ -328,6 +396,8 @@ while run:
         game.drawStars(win)
         sprites.update()
         sprites.draw(win)
+        beerSprite.update()
+        beerSprite.draw(win)
         pwrSprites.update()
         topSprites.update()
         game.drawBullets(win, gun.bulletsLeft)
@@ -345,8 +415,21 @@ while run:
         if globals.debug == True:
             game.drawSeconds(win, font, 68, 142)
             game.drawDebugger(win, fontCaviar, globals.winWidth/2, globals.winHeight/2, '', '')
-        #game.drawPhrases(win, fontCaviar, globals.winWidth/2, 32, phrases.items[1])
+        game.drawPhrases(win, fontCaviar, globals.winWidth/2, 32)
         game.drawTime(win, font, 182, 63)
+        
+        if drunk == True:
+            # Blur screen (drunk effect)
+            if drunkExpire < (10 * globals.second) and drunkExpire > (5 * globals.second):
+                surf = game.blurSurf(win, random.randint(1, 15))
+            elif drunkExpire < (5 * globals.second) and drunkExpire > (3 * globals.second):
+                surf = game.blurSurf(win, random.randint(1, 8))
+            elif drunkExpire < (3 * globals.second) and drunkExpire > (2 * globals.second):
+                surf = game.blurSurf(win, random.randint(1, 4))
+            else:
+                surf = game.blurSurf(win, random.randint(1, 2))
+            win.blit(surf, (0, 0))
+
         pygame.display.update()
         ### END RENDER SCREEN ###
 
@@ -355,11 +438,17 @@ while run:
         if globals.roomInit == False:
             # Destroy powerups
             pwrBullets.kill()
+            pwrBomb.kill()
+            # Remove power-up text
+            globals.drawPowerText = False
             # Kill enemy
             foe.kill()
+            beer.kill()
             # Play game over sound
             sndGameOver.play()
             globals.roomInit = True
+            # Restart phrase counter
+            globals.phraseSteps = 0
 
         win.blit(bg, (0, 0))
         game.drawStars(win)

@@ -5,6 +5,7 @@ import random
 import globals
 from os import listdir
 from resources import colors
+from resources import phrases
 from os.path import isfile, join
 
 # Game window
@@ -170,10 +171,25 @@ def drawTime(screen, font, x, y):
     screen.blit(font, textRect)
 
 # Draw a funny phrase
-def drawPhrases(screen, font, x, y, phrase):
-    font = font.render(phrase, True, colors.white)
-    textRect = font.get_rect(center=(x, y))
-    screen.blit(font, textRect)
+def drawPhrases(screen, font, x, y):
+    # Step counter for phrases
+    globals.phraseSteps += 1
+
+    if globals.phraseSteps % (globals.second * globals.phraseDrawOnSec) == 0:
+        globals.selectedPhrase = random.choice(phrases.items)
+        globals.phraseOnScreen = True
+    if globals.phraseSteps % (globals.second * (globals.phraseDrawOnSec + 5)) == 0:
+        # Hide phrase and restart phrase counter
+        globals.phraseOnScreen = False
+        globals.phraseSteps = 0
+        # Make the phrases appear in a random interval
+        globals.phraseDrawOnSec = random.randint(10, 20)
+
+    # Draw phrase
+    if globals.phraseOnScreen == True:
+        font = font.render(globals.selectedPhrase, True, colors.white)
+        textRect = font.get_rect(center=(x, y))
+        screen.blit(font, textRect)
 
 # Draw seconds (for debugging purpose)
 def drawSeconds(screen, font, x, y):
@@ -186,6 +202,17 @@ def drawDebugger(screen, font, x, y, arg1, arg2):
     font = font.render(arg1 + ' ' + arg2, True, colors.white)
     textRect = font.get_rect(center=(x, y))
     screen.blit(font, textRect)
+
+# Blur a surface
+def blurSurf(surface, amt):
+    if amt < 1.0:
+        raise ValueError("Arg 'amt' must be greater than 1.0, passed in value is %s"%amt)
+    scale = 1.0/float(amt)
+    surf_size = surface.get_size()
+    scale_size = (int(surf_size[0]*scale), int(surf_size[1]*scale))
+    surf = pygame.transform.smoothscale(surface, scale_size)
+    surf = pygame.transform.smoothscale(surf, surf_size)
+    return surf
 
 # Clear scores and stuff
 def clear():
