@@ -47,6 +47,9 @@ timerPowerUpDestroy = 3 # How many seconds a power up stays on screen
 # Maximum bullets
 gunMaxBullets = 10
 
+# Bombs
+bombs = 5
+
 # Stars
 stars = []
 starsLayer2 = []

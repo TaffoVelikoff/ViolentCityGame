@@ -25,9 +25,8 @@ class BulletPlus(pygame.sprite.Sprite):
 		# Place on screen
 		self.rect.center = (random.randint(1, globals.winWidth - 140), random.randint(100, globals.winHeight - 140))
 
-	def putOutOfScreen(self):
-		self.rect.x = -100
-		self.rect.y = -100
+	def kill(self):
+		self.rect.center = (-300, -300)
 
 class BulletPlusGone(pygame.sprite.Sprite):
 	frames = []
@@ -83,10 +82,9 @@ class Bomb(pygame.sprite.Sprite):
 		# Place on screen
 		self.rect.center = (random.randint(1, globals.winWidth - 140), random.randint(100, globals.winHeight - 140))
 
-	def putOutOfScreen(self):
-		self.rect.x = -100
-		self.rect.y = -100
-
+	def kill(self):
+		self.rect.center = (-300, -300)
+		
 class BombGone(pygame.sprite.Sprite):
 	frames = []
 

@@ -62,6 +62,17 @@ def drawBullets(screen, bulletsLeft):
     if bulletsLeft == 0:
         screen.blit(pygame.image.load(os.path.join(globals.data_dir, 'img/info/reload.png')).convert_alpha(), (globals.winWidth - 240, 16))
 
+# Draw remaining bombs (power-up)
+def drawBombs(screen, font):
+    if globals.bombs > 0:
+        # Draw bomb icon 
+        screen.blit(pygame.image.load(os.path.join(globals.data_dir, 'img/pwrp/bomb.png')).convert_alpha(), (16, globals.winHeight - 112))
+        # Draw amount & Key
+        screen.blit(pygame.transform.scale(pygame.image.load(os.path.join(globals.data_dir, 'img/keys/key_z.png')).convert_alpha(), (16, 16)), (54, globals.winHeight - 110))
+        fontAmount = font.render('x' + str(globals.bombs), True, colors.white)
+        screen.blit(fontAmount, (62, globals.winHeight - 88))
+
+
 # Draw the status bar
 def drawStatusbar(screen, statusBarImage, font, fontSmall):
     # Draw status bar image
@@ -87,8 +98,11 @@ def drawStatusbar(screen, statusBarImage, font, fontSmall):
     screen.blit(fontScore, (74, 100))
 
 # increment score based on level & Kills
-def incrementScore():
-    globals.score += globals.scorePerKill * globals.level
+def incrementScore(amount = None):
+    if amount:
+        globals.score += amount
+    else:
+        globals.score += globals.scorePerKill * globals.level
 
 # Draw images for game over screen
 def drawGameOver(screen, imgOhSnap, imgReplay):

@@ -170,3 +170,7 @@ class Beer(pygame.sprite.Sprite):
 			self.rect.y += self.speed
 		else:
 			self.rect.y -= self.speed
+
+	def kill(self):
+		# Put outside of screen
+		self.rect.center = (-300, -300)
