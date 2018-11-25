@@ -12,6 +12,7 @@ from resources.classes import weapons
 from resources.classes import powerup
 
 # Init pygame
+pygame.mixer.pre_init(22050, -16, 2, 512)
 pygame.init()
 pygame.font.init()
 
@@ -175,6 +176,8 @@ while run:
                     # Create an enemy
                     foe = enemy.Enemy()
                     sprites.add(foe)
+                    # Restart bombs
+                    globals.bombs = 5
                     # Switch rooms
                     room = 'main'
 
@@ -347,6 +350,8 @@ while run:
                     drunk = True 
                     drunkExpire = 10 * globals.second # Drunk mode should expire in X seconds
                     beerClock = random.randint(25, 40)
+                    # Kill crosshair
+                    cursor.kill()
 
         # Shooting
         if pressed1 and isShooting == False:
@@ -424,6 +429,9 @@ while run:
             drunkExpire -= 1
             if drunkExpire == 0:
                 drunk = False
+                # Make new crosshair
+                cursor = weapons.Crosshair()
+                topSprites.add(cursor)
 
         # Animate current kill score
         if globals.enemyScorePosChange == True:
